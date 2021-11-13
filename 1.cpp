@@ -3,7 +3,7 @@
 #include <string>
 #include <cassert>
 
-template <class T>
+template <class T, int length>
 class Array
 {
 private:
@@ -12,16 +12,12 @@ private:
  
 public:
     Array()
+        : m_length(length)
     {
-        m_length = 0;
-        m_data = nullptr;
-    }
- 
-    Array(int length)
-    {
-        assert(length > 0);
-        m_data = new T[length];
-        m_length = length;
+        if(length > 0)
+            m_data = new T[length];
+        else
+            m_data = nullptr;                        
     }
  
     ~Array()
@@ -29,7 +25,7 @@ public:
         delete[] m_data;
     }
  
-    void Erase()
+    void erase()
     {
         delete[] m_data;
         // Присваиваем значение nullptr для m_data, чтобы на выходе не получить висячий указатель!
@@ -37,12 +33,11 @@ public:
         m_length = 0;
     }
  
-    T & operator[](int index)
+    T& operator[](int index)
     {
-        assert(index >= 0 && index < m_length);
-        return m_data[index];
+        if(index >= 0 && index < m_length)
+            return m_data[index];
     }
-    
     
     void delElement(int num)
     {
@@ -59,7 +54,9 @@ public:
 
 int main()
 {
-    Array<double> arrayDouble(10);
+    Array<double, 10> arrayDouble;
+    
+    std::cout << arrayDouble.getLength() << std::endl;
     
     for(int i = 0; i < arrayDouble.getLength(); ++i)
         arrayDouble[i] = i;
