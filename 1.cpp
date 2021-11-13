@@ -3,71 +3,115 @@
 #include <string>
 #include <cassert>
 
-template <class T, int length>
-class Array
+template <class T>
+class Array_Base
 {
-private:
-    int m_length;
-    T *m_data;
+protected:
+    T m_data;
  
+public:    
+    Array_Base()
+    {
+    }
+
+    Array_Base(T data)
+    {        
+        m_data = data;
+    }
+ 
+    virtual ~Array_Base()
+    {
+    }
+    
+    virtual void print()
+    {
+        std::cout << "value: " << m_data << "\n";
+    }
+};
+
+
+template<class T>
+class Array : public Array_Base<T>
+{
+};
+
+template<class T>
+class Array<T*> : public Array_Base<T*>
+{
+protected:
+    int m_length;    
 public:
-    Array()
+    Array(int length)
+        : m_length(length)
+    {        
+        if(length > 0)
+            this->m_data = new T[length];
+        else
+            this->m_data = nullptr;
+    }
+    
+    Array(T* data, int length)
         : m_length(length)
     {
-        if(length > 0)
-            m_data = new T[length];
-        else
-            m_data = nullptr;                        
+        this->m_data = new T[length];
+        
+        for(int i = 0; i < length; i++)
+            this->m_data[i] = data[i];
     }
- 
-    ~Array()
+    
+    virtual ~Array()
     {
-        delete[] m_data;
+        delete[] this->m_data;
     }
- 
+    
+    virtual void print()
+    {
+        for(int i = 0; i < m_length; i++)
+            std::cout << this->m_data[i];
+        std::cout << std::endl;
+    }
+    
     void erase()
     {
-        delete[] m_data;
+        delete[] this->m_data;
         // Присваиваем значение nullptr для m_data, чтобы на выходе не получить висячий указатель!
-        m_data = nullptr;
+        this->m_data = nullptr;
         m_length = 0;
-    }
- 
-    T& operator[](int index)
-    {
-        if(index >= 0 && index < m_length)
-            return m_data[index];
     }
     
     void delElement(int num)
     {
-        T temp = m_data[num - 1];
+        T temp = this->m_data[num - 1];
         for(int i = num - 1; i < m_length - 1; i++)
-            m_data[i] = m_data[i + 1];
-        m_data[m_length - 1] = temp;
+            this->m_data[i] = this->m_data[i + 1];
+        this->m_data[m_length - 1] = temp;
         
         m_length--;
     }
+    
+    T& operator[](int index)
+    {
+        if(index >= 0 && index < m_length)
+            return this->m_data[index];
+    }
+    
+    T* getArray() { return this->m_data; }
  
     int getLength() { return m_length; }
 };
 
+
 int main()
 {
-    Array<double, 10> arrayDouble;
+    int size = 5;
+    std::cout << "Enter size of array: ";
+    std::cin >> size;
     
-    std::cout << arrayDouble.getLength() << std::endl;
+    if(std::cin.fail())
+    {
+        std::cin.ignore(32767, '\n');
+    }
+    Array<char*> arrayChar(new char[size] {'H', 'e', 'l', 'l', 'o'}, size);    
     
-    for(int i = 0; i < arrayDouble.getLength(); ++i)
-        arrayDouble[i] = i;
-    
-    for(int i = 0; i < arrayDouble.getLength(); i++)
-        std::cout << arrayDouble[i] << " ";
-    std::cout << std::endl;
-    
-    arrayDouble.delElement(2);
-    
-    for(int i = 0; i < arrayDouble.getLength(); i++)
-        std::cout << arrayDouble[i] << " ";
-    std::cout << std::endl;
+    arrayChar.print();
 }
